@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — TodoApp</title>
+
+  <link rel="stylesheet" href="/todo-frontend/src/output.css">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body class="min-h-screen bg-[#0D1F23] flex items-center justify-center px-4 py-10 relative overflow-hidden font-['DM_Sans']">
+
+  <!-- Background Glow -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-[-120px] left-[-120px] w-[350px] h-[350px] bg-[#132E35] opacity-40 blur-3xl rounded-full"></div>
+    <div class="absolute bottom-[-120px] right-[-120px] w-[350px] h-[350px] bg-[#2D4A53] opacity-30 blur-3xl rounded-full"></div>
+  </div>
+
+  <!-- Card -->
+  <div
+    class="relative z-10 w-full max-w-md bg-[#132E35]/95 border border-[#2D4A53] rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-sm animate-[fadeIn_.4s_ease]"
+  >
+
+    <!-- Logo -->
+    <div class="mb-8">
+      <h1 class="font-['Syne'] text-4xl font-extrabold tracking-tight text-[#AFB3B7]">
+        Todo<span class="text-[#69818D]">.</span>
+      </h1>
+
+      <p class="text-sm text-[#69818D] mt-2">
+        Sign in to your account
+      </p>
+    </div>
+
+    <!-- Error -->
+    <div
+      class="hidden mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+      id="error"
+    ></div>
+
+    <!-- Form -->
+    <form id="loginForm" class="space-y-5">
+
+      <!-- Email -->
+      <div>
+        <label
+          class="block text-xs uppercase tracking-[0.2em] text-[#69818D] font-medium mb-2"
+        >
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="email"
+          placeholder="you@example.com"
+          required
+          class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] placeholder:text-[#5A636A] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20"
+        />
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label
+          class="block text-xs uppercase tracking-[0.2em] text-[#69818D] font-medium mb-2"
+        >
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="password"
+          placeholder="••••••••"
+          required
+          class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] placeholder:text-[#5A636A] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20"
+        />
+      </div>
+
+      <!-- Button -->
+      <button
+        class="w-full rounded-xl bg-[#2D4A53] hover:bg-[#3a5f6e] active:scale-[0.98] transition-all duration-200 py-3.5 font-['Syne'] text-sm font-bold tracking-wide text-[#AFB3B7] disabled:opacity-50 disabled:cursor-not-allowed"
+        type="submit"
+        id="submitBtn"
+      >
+        Sign In
+      </button>
+    </form>
+
+    <!-- Divider -->
+    <div class="relative my-7">
+      <div class="border-t border-[#2D4A53]"></div>
+    </div>
+
+    <!-- Guest Button -->
+    <button
+      class="w-full rounded-xl border border-[#2D4A53] py-3 text-sm text-[#69818D] hover:border-[#69818D] hover:text-[#AFB3B7] transition-all duration-200"
+      onclick="window.location.href='guest.html'"
+    >
+      Continue as Guest →
+    </button>
+
+    <!-- Footer -->
+    <div class="mt-7 text-center text-sm text-[#69818D]">
+      Don't have an account?
+
+      <a
+        href="register.html"
+        class="text-[#AFB3B7] font-medium border-b border-[#2D4A53] hover:border-[#AFB3B7] transition-all"
+      >
+        Create one
+      </a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+
+  <script>
+    if (api.isLoggedIn()) window.location.href = 'todos.html';
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const errorEl = document.getElementById('error');
+      errorEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const data = await api.login({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+        });
+
+        api.setToken(data.access_token);
+        window.location.href = 'todos.html';
+
+      } catch (err) {
+        const msg = err.status === 401
+          ? 'Invalid email or password.'
+          : (typeof err.detail === 'string'
+              ? err.detail
+              : 'Something went wrong.');
+
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    });
+  </script>
+
+</body>
+</html>

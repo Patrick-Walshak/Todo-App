@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Todos — TodoApp</title>
+
+  <link rel="stylesheet" href="/todo-frontend/src/output.css">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body class="min-h-screen bg-[#0D1F23] text-[#AFB3B7] font-['DM_Sans'] relative overflow-x-hidden">
+
+  <!-- Background Glow -->
+  <div class="fixed inset-0 overflow-hidden -z-10">
+    <div class="absolute top-[-120px] left-[-120px] w-[350px] h-[350px] bg-[#132E35] opacity-40 blur-3xl rounded-full"></div>
+    <div class="absolute bottom-[-120px] right-[-120px] w-[350px] h-[350px] bg-[#2D4A53] opacity-30 blur-3xl rounded-full"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-50 border-b border-[#2D4A53] bg-[#132E35]/90 backdrop-blur-md">
+
+    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+
+      <!-- Logo -->
+      <div class="font-['Syne'] text-2xl font-extrabold tracking-tight text-[#AFB3B7]">
+        Todo<span class="text-[#69818D]">.</span>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center gap-4">
+
+        <span
+          class="hidden sm:block text-sm text-[#69818D]"
+          id="navUser"
+        ></span>
+
+        <button
+          class="border border-[#2D4A53] text-[#69818D] hover:text-[#AFB3B7] hover:border-[#69818D] px-4 py-2 rounded-xl text-sm transition-all duration-200"
+          onclick="logout()"
+        >
+          Sign Out
+        </button>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="max-w-4xl mx-auto px-5 py-10">
+
+    <!-- Create Todo -->
+    <div
+      class="bg-[#132E35]/95 border border-[#2D4A53] rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-sm mb-10"
+    >
+
+      <h2 class="font-['Syne'] text-2xl font-bold text-[#AFB3B7] mb-6">
+        New Todo
+      </h2>
+
+      <!-- Error -->
+      <div
+        class="hidden mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+        id="createError"
+      ></div>
+
+      <!-- Title -->
+      <input
+        type="text"
+        id="newTitle"
+        placeholder="What needs to be done?"
+        class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] placeholder:text-[#5A636A] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20 mb-4"
+      />
+
+      <!-- Body -->
+      <textarea
+        id="newBody"
+        rows="3"
+        placeholder="Add some details..."
+        class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] placeholder:text-[#5A636A] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20 mb-5 resize-none"
+      ></textarea>
+
+      <!-- Button -->
+      <button
+        class="bg-[#2D4A53] hover:bg-[#3a5f6e] active:scale-[0.98] transition-all duration-200 px-6 py-3 rounded-xl font-['Syne'] text-sm font-bold tracking-wide text-[#AFB3B7] disabled:opacity-50 disabled:cursor-not-allowed"
+        id="addBtn"
+        onclick="createTodo()"
+      >
+        + Add Todo
+      </button>
+
+    </div>
+
+    <!-- Section Header -->
+    <div class="flex items-center justify-between mb-5">
+
+      <h2 class="font-['Syne'] text-2xl font-bold text-[#AFB3B7]">
+        My Todos
+      </h2>
+
+      <div
+        class="bg-[#2D4A53] text-[#69818D] text-xs font-semibold px-4 py-1.5 rounded-full"
+        id="countBadge"
+      >
+        0
+      </div>
+
+    </div>
+
+    <!-- Todo List -->
+    <div class="space-y-4" id="todoList">
+
+      <div class="text-center py-20 text-[#5A636A]">
+
+        <div class="text-5xl mb-4 opacity-60">
+          📋
+        </div>
+
+        <div class="text-sm">
+          Loading your todos...
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Edit Modal -->
+  <div
+    class="fixed inset-0 bg-[#0D1F23]/80 backdrop-blur-sm hidden items-center justify-center z-50 px-4"
+    id="editModal"
+  >
+
+    <div
+      class="w-full max-w-lg bg-[#132E35] border border-[#2D4A53] rounded-3xl p-7 shadow-2xl"
+    >
+
+      <h3 class="font-['Syne'] text-2xl font-bold text-[#AFB3B7] mb-6">
+        Edit Todo
+      </h3>
+
+      <!-- Edit Title -->
+      <input
+        type="text"
+        id="editTitle"
+        placeholder="Title"
+        class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] placeholder:text-[#5A636A] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20 mb-4"
+      />
+
+      <!-- Edit Body -->
+      <textarea
+        id="editBody"
+        rows="4"
+        placeholder="Details"
+        class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] placeholder:text-[#5A636A] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20 mb-4 resize-none"
+      ></textarea>
+
+      <!-- Status -->
+      <select
+        id="editStatus"
+        class="w-full rounded-xl border border-[#2D4A53] bg-[#0D1F23] px-4 py-3.5 text-[#AFB3B7] outline-none transition-all duration-200 focus:border-[#69818D] focus:ring-2 focus:ring-[#69818D]/20 mb-6"
+      >
+        <option value="PENDING">Pending</option>
+        <option value="COMPLETED">Completed</option>
+      </select>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-3">
+
+        <button
+          class="flex-1 border border-[#2D4A53] text-[#69818D] hover:text-[#AFB3B7] hover:border-[#69818D] py-3 rounded-xl text-sm transition-all duration-200"
+          onclick="closeModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="flex-1 bg-[#2D4A53] hover:bg-[#3a5f6e] text-[#AFB3B7] py-3 rounded-xl font-['Syne'] text-sm font-bold tracking-wide transition-all duration-200"
+          onclick="saveEdit()"
+        >
+          Save Changes
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+
+  <script>
+    if (!api.isLoggedIn()) window.location.href = 'index.html';
+
+    let todos = [];
+    let editingId = null;
+
+    function logout() {
+      api.removeToken();
+      window.location.href = 'index.html';
+    }
+
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;');
+    }
+
+    function renderTodos() {
+
+      const list = document.getElementById('todoList');
+
+      document.getElementById('countBadge').textContent = todos.length;
+
+      if (todos.length === 0) {
+
+        list.innerHTML = `
+          <div class="text-center py-20 text-[#5A636A]">
+            <div class="text-5xl mb-4 opacity-60">✅</div>
+            <div class="text-sm">
+              No todos yet. Create your first one above!
+            </div>
+          </div>
+        `;
+
+        return;
+      }
+
+      list.innerHTML = todos.map(todo => `
+        <div
+          class="bg-[#132E35]/95 border border-[#2D4A53] hover:border-[#69818D] rounded-2xl p-5 transition-all duration-200 shadow-lg flex gap-4 ${todo.status === 'COMPLETED' ? 'opacity-60' : ''}"
+          id="card-${todo.id}"
+        >
+
+          <!-- Check -->
+          <button
+            class="w-6 h-6 min-w-[24px] rounded-lg border-2 flex items-center justify-center transition-all duration-200 mt-1 ${todo.status === 'COMPLETED'
+              ? 'bg-[#2D4A53] border-[#2D4A53] text-[#AFB3B7]'
+              : 'border-[#2D4A53]'}"
+            onclick="toggleStatus(${todo.id}, '${todo.status}')"
+          >
+            ${todo.status === 'COMPLETED' ? '✓' : ''}
+          </button>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+
+              <div class="flex-1">
+
+                <div class="font-['Syne'] text-lg font-semibold mb-2 ${todo.status === 'COMPLETED'
+                  ? 'line-through text-[#5A636A]'
+                  : 'text-[#AFB3B7]'}">
+                  ${escHtml(todo.title)}
+                </div>
+
+                <div class="text-sm text-[#69818D] leading-relaxed">
+                  ${escHtml(todo.body)}
+                </div>
+
+                <div class="text-xs text-[#5A636A] mt-4">
+                  ${formatDate(todo.created_at)}
+                </div>
+
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+
+                <span class="text-[11px] uppercase tracking-wide font-semibold px-3 py-1 rounded-full ${todo.status === 'PENDING'
+                  ? 'bg-green-500/10 text-green-300'
+                  : 'bg-blue-500/10 text-blue-300'}">
+                  ${todo.status}
+                </span>
+
+                <button
+                  class="border border-[#2D4A53] hover:border-[#69818D] hover:text-[#AFB3B7] text-[#69818D] px-3 py-1.5 rounded-lg text-xs transition-all duration-200"
+                  onclick="openEdit(${todo.id})"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="border border-[#2D4A53] hover:border-red-500/40 hover:text-red-300 text-[#69818D] px-3 py-1.5 rounded-lg text-xs transition-all duration-200"
+                  onclick="deleteTodo(${todo.id})"
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      `).join('');
+    }
+
+    async function loadTodos() {
+
+      try {
+
+        const data = await api.getTodos();
+
+        todos = data.todos;
+
+        renderTodos();
+
+      } catch (err) {
+
+        if (err.status === 401) {
+          api.removeToken();
+          window.location.href = 'index.html';
+        }
+      }
+    }
+
+    async function createTodo() {
+
+      const title = document.getElementById('newTitle').value.trim();
+      const body = document.getElementById('newBody').value.trim();
+
+      const errorEl = document.getElementById('createError');
+      const btn = document.getElementById('addBtn');
+
+      if (!title || !body) {
+
+        errorEl.textContent = 'Title and details are required.';
+        errorEl.style.display = 'block';
+
+        return;
+      }
+
+      errorEl.style.display = 'none';
+
+      btn.disabled = true;
+      btn.textContent = 'Adding...';
+
+      try {
+
+        const todo = await api.createTodo({ title, body });
+
+        todos.unshift(todo);
+
+        renderTodos();
+
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newBody').value = '';
+
+      } catch (err) {
+
+        errorEl.textContent = 'Failed to create todo.';
+        errorEl.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.textContent = '+ Add Todo';
+    }
+
+    async function toggleStatus(id, currentStatus) {
+
+      const newStatus = currentStatus === 'PENDING'
+        ? 'COMPLETED'
+        : 'PENDING';
+
+      try {
+
+        const updated = await api.updateTodo(id, {
+          status: newStatus
+        });
+
+        todos = todos.map(t => t.id === id ? updated : t);
+
+        renderTodos();
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function deleteTodo(id) {
+
+      if (!confirm('Delete this todo?')) return;
+
+      try {
+
+        await api.deleteTodo(id);
+
+        todos = todos.filter(t => t.id !== id);
+
+        renderTodos();
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function openEdit(id) {
+
+      const todo = todos.find(t => t.id === id);
+
+      editingId = id;
+
+      document.getElementById('editTitle').value = todo.title;
+      document.getElementById('editBody').value = todo.body;
+      document.getElementById('editStatus').value = todo.status;
+
+      const modal = document.getElementById('editModal');
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+
+      const modal = document.getElementById('editModal');
+
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+
+      editingId = null;
+    }
+
+    async function saveEdit() {
+
+      const title = document.getElementById('editTitle').value.trim();
+
+      const body = document.getElementById('editBody').value.trim();
+
+      const status = document.getElementById('editStatus').value;
+
+      try {
+
+        const updated = await api.updateTodo(editingId, {
+          title,
+          body,
+          status
+        });
+
+        todos = todos.map(t =>
+          t.id === editingId ? updated : t
+        );
+
+        renderTodos();
+
+        closeModal();
+
+      } catch (err) {
+        alert('Failed to update todo.');
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('editModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Enter key to add todo
+    document.getElementById('newTitle').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') createTodo();
+    });
+
+    loadTodos();
+  </script>
+
+</body>
+</html>
