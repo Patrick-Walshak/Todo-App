@@ -2,11 +2,9 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-
 import app.auth.models  # noqa: F401
 import app.guest.models  # noqa: F401
 import app.todos.models  # noqa: F401
-
 from app.auth.router import router as auth_router
 from app.guest.router import router as guest_router
 from app.todos.router import router as todos_router
@@ -16,7 +14,7 @@ app = FastAPI(title="Todo API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
