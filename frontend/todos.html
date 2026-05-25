@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Todos — TodoApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--c1:#0D1F23;--c2:#132E35;--c3:#2D4A53;--c4:#69818D;--c5:#AFB3B7;--c6:#5A636A;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background-color:var(--c1);font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--c5);}
+    nav{background:var(--c2);border-bottom:1px solid var(--c3);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+    .logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--c5);}
+    .logo span{color:var(--c4);}
+    .nav-right{display:flex;align-items:center;gap:16px;}
+    .nav-user{color:var(--c4);font-size:14px;}
+    .logout-btn{background:transparent;border:1px solid var(--c3);color:var(--c4);border-radius:8px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;}
+    .logout-btn:hover{border-color:var(--c4);color:var(--c5);}
+    main{max-width:760px;margin:0 auto;padding:40px 24px;}
+    .create-card{background:var(--c2);border:1px solid var(--c3);border-radius:16px;padding:28px;margin-bottom:32px;}
+    .create-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--c5);margin-bottom:20px;}
+    input,textarea{width:100%;background:var(--c1);border:1px solid var(--c3);border-radius:10px;padding:13px 16px;color:var(--c5);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;margin-bottom:12px;resize:none;}
+    input:focus,textarea:focus{border-color:var(--c4);}
+    input::placeholder,textarea::placeholder{color:var(--c6);}
+    .add-btn{background:var(--c3);color:var(--c5);border:none;border-radius:10px;padding:12px 24px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;}
+    .add-btn:hover{background:#3a5f6e;}
+    .add-btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .section-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--c5);}
+    .count-badge{background:var(--c3);color:var(--c4);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;}
+    .todo-list{display:flex;flex-direction:column;gap:12px;}
+    .todo-card{background:var(--c2);border:1px solid var(--c3);border-radius:14px;padding:20px 24px;display:flex;align-items:flex-start;gap:16px;transition:border-color 0.2s;}
+    .todo-card:hover{border-color:var(--c4);}
+    .todo-card.completed{opacity:0.6;}
+    .check-btn{width:22px;height:22px;min-width:22px;border-radius:6px;border:2px solid var(--c3);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-top:2px;}
+    .check-btn.done{background:var(--c3);border-color:var(--c3);}
+    .check-btn.done::after{content:'✓';color:var(--c5);font-size:13px;}
+    .todo-content{flex:1;min-width:0;}
+    .todo-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--c5);margin-bottom:4px;}
+    .todo-card.completed .todo-title{text-decoration:line-through;color:var(--c6);}
+    .todo-body{font-size:13px;color:var(--c4);line-height:1.5;}
+    .todo-meta{font-size:11px;color:var(--c6);margin-top:8px;}
+    .status-badge{font-size:11px;font-weight:600;letter-spacing:0.05em;padding:3px 10px;border-radius:20px;text-transform:uppercase;}
+    .status-pending{background:#2a3a1a;color:#9acd6e;}
+    .status-completed{background:#1a2a3a;color:#6eaacd;}
+    .todo-actions{display:flex;gap:8px;align-items:center;}
+    .action-btn{background:transparent;border:1px solid var(--c3);color:var(--c4);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+    .action-btn:hover{border-color:var(--c4);color:var(--c5);}
+    .delete-btn:hover{border-color:#7a2a2a;color:#f87171;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(13,31,35,0.85);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(4px);}
+    .modal-overlay.active{display:flex;}
+    .modal{background:var(--c2);border:1px solid var(--c3);border-radius:20px;padding:36px;width:100%;max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,0.5);}
+    .modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--c5);margin-bottom:24px;}
+    .modal-actions{display:flex;gap:12px;margin-top:8px;}
+    .save-btn{flex:1;background:var(--c3);color:var(--c5);border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;}
+    .save-btn:hover{background:#3a5f6e;}
+    .cancel-btn{flex:1;background:transparent;color:var(--c4);border:1px solid var(--c3);border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;}
+    .cancel-btn:hover{border-color:var(--c4);color:var(--c5);}
+    select{width:100%;background:var(--c1);border:1px solid var(--c3);border-radius:10px;padding:13px 16px;color:var(--c5);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:12px;cursor:pointer;}
+    .empty{text-align:center;padding:60px 20px;color:var(--c6);}
+    .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.5;}
+    .error-toast{background:#3b1a1a;border:1px solid #7a2a2a;color:#f87171;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:20px;display:none;}
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Todo<span>.</span></div>
+    <div class="nav-right">
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </nav>
+  <main>
+    <div class="create-card">
+      <div class="create-title">New Todo</div>
+      <div class="error-toast" id="createError"></div>
+      <input type="text" id="newTitle" placeholder="What needs to be done?" />
+      <textarea id="newBody" rows="2" placeholder="Add some details..."></textarea>
+      <button class="add-btn" id="addBtn" onclick="createTodo()">+ Add Todo</button>
+    </div>
+    <div class="section-header">
+      <div class="section-title">My Todos</div>
+      <div class="count-badge" id="countBadge">0</div>
+    </div>
+    <div class="todo-list" id="todoList">
+      <div class="empty"><div class="empty-icon">📋</div><div>Loading your todos...</div></div>
+    </div>
+  </main>
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-title">Edit Todo</div>
+      <input type="text" id="editTitle" placeholder="Title" />
+      <textarea id="editBody" rows="3" placeholder="Details"></textarea>
+      <select id="editStatus">
+        <option value="PENDING">Pending</option>
+        <option value="COMPLETED">Completed</option>
+      </select>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+        <button class="save-btn" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    if(!api.isLoggedIn()) window.location.href='index.html';
+    let todos=[];
+    let editingId=null;
+    function logout(){api.removeToken();window.location.href='index.html';}
+    function formatDate(iso){return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+    function escHtml(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function renderTodos(){
+      const list=document.getElementById('todoList');
+      document.getElementById('countBadge').textContent=todos.length;
+      if(todos.length===0){list.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div>No todos yet. Create your first one above!</div></div>';return;}
+      list.innerHTML=todos.map(todo=>`
+        <div class="todo-card ${todo.status==='COMPLETED'?'completed':''}" id="card-${todo.id}">
+          <button class="check-btn ${todo.status==='COMPLETED'?'done':''}" onclick="toggleStatus(${todo.id},'${todo.status}')"></button>
+          <div class="todo-content">
+            <div class="todo-title">${escHtml(todo.title)}</div>
+            <div class="todo-body">${escHtml(todo.body)}</div>
+            <div class="todo-meta">${formatDate(todo.created_at)}</div>
+          </div>
+          <div class="todo-actions">
+            <span class="status-badge status-${todo.status.toLowerCase()}">${todo.status}</span>
+            <button class="action-btn" onclick="openEdit(${todo.id})">Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteTodo(${todo.id})">Delete</button>
+          </div>
+        </div>`).join('');
+    }
+    async function loadTodos(){
+      try{const data=await api.getTodos();todos=data.todos;renderTodos();}
+      catch(err){if(err.status===401){api.removeToken();window.location.href='index.html';}}
+    }
+    async function createTodo(){
+      const title=document.getElementById('newTitle').value.trim();
+      const body=document.getElementById('newBody').value.trim();
+      const errorEl=document.getElementById('createError');
+      const btn=document.getElementById('addBtn');
+      if(!title||!body){errorEl.textContent='Title and details are required.';errorEl.style.display='block';return;}
+      errorEl.style.display='none';btn.disabled=true;btn.textContent='Adding...';
+      try{const todo=await api.createTodo({title,body});todos.unshift(todo);renderTodos();document.getElementById('newTitle').value='';document.getElementById('newBody').value='';}
+      catch(err){errorEl.textContent='Failed to create todo.';errorEl.style.display='block';}
+      btn.disabled=false;btn.textContent='+ Add Todo';
+    }
+    async function toggleStatus(id,currentStatus){
+      const newStatus=currentStatus==='PENDING'?'COMPLETED':'PENDING';
+      try{const updated=await api.updateTodo(id,{status:newStatus});todos=todos.map(t=>t.id===id?updated:t);renderTodos();}
+      catch(err){console.error(err);}
+    }
+    async function deleteTodo(id){
+      if(!confirm('Delete this todo?')) return;
+      try{await api.deleteTodo(id);todos=todos.filter(t=>t.id!==id);renderTodos();}
+      catch(err){console.error(err);}
+    }
+    function openEdit(id){
+      const todo=todos.find(t=>t.id===id);
+      editingId=id;
+      document.getElementById('editTitle').value=todo.title;
+      document.getElementById('editBody').value=todo.body;
+      document.getElementById('editStatus').value=todo.status;
+      document.getElementById('editModal').classList.add('active');
+    }
+    function closeModal(){document.getElementById('editModal').classList.remove('active');editingId=null;}
+    async function saveEdit(){
+      const title=document.getElementById('editTitle').value.trim();
+      const body=document.getElementById('editBody').value.trim();
+      const status=document.getElementById('editStatus').value;
+      try{const updated=await api.updateTodo(editingId,{title,body,status});todos=todos.map(t=>t.id===editingId?updated:t);renderTodos();closeModal();}
+      catch(err){alert('Failed to update todo.');}
+    }
+    document.getElementById('editModal').addEventListener('click',(e)=>{if(e.target===e.currentTarget)closeModal();});
+    document.getElementById('newTitle').addEventListener('keydown',(e)=>{if(e.key==='Enter')createTodo();});
+    loadTodos();
+  </script>
+</body>
+</html>

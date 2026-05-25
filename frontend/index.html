@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — TodoApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--c1:#0D1F23;--c2:#132E35;--c3:#2D4A53;--c4:#69818D;--c5:#AFB3B7;--c6:#5A636A;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background-color:var(--c1);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .card{background:var(--c2);border:1px solid var(--c3);border-radius:20px;padding:48px 40px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,0.4);}
+    .logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--c5);margin-bottom:8px;}
+    .logo span{color:var(--c4);}
+    .subtitle{color:var(--c4);font-size:14px;margin-bottom:36px;}
+    label{display:block;font-size:12px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--c4);margin-bottom:8px;}
+    input{width:100%;background:var(--c1);border:1px solid var(--c3);border-radius:10px;padding:14px 16px;color:var(--c5);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s;margin-bottom:20px;}
+    input:focus{border-color:var(--c4);}
+    input::placeholder{color:var(--c6);}
+    .btn{width:100%;background:var(--c3);color:var(--c5);border:none;border-radius:10px;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s;margin-top:4px;}
+    .btn:hover{background:#3a5f6e;}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .error{background:#3b1a1a;border:1px solid #7a2a2a;color:#f87171;border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:20px;display:none;}
+    .link-row{text-align:center;margin-top:24px;color:var(--c4);font-size:14px;}
+    .link-row a{color:var(--c5);text-decoration:none;font-weight:500;border-bottom:1px solid var(--c3);}
+    .divider{border:none;border-top:1px solid var(--c3);margin:28px 0;}
+    .guest-btn{width:100%;background:transparent;color:var(--c4);border:1px solid var(--c3);border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;}
+    .guest-btn:hover{border-color:var(--c4);color:var(--c5);}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Todo<span>.</span></div>
+    <div class="subtitle">Sign in to your account</div>
+    <div class="error" id="error"></div>
+    <form id="loginForm">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required />
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required />
+      <button class="btn" type="submit" id="submitBtn">Sign In</button>
+    </form>
+    <hr class="divider" />
+    <button class="guest-btn" onclick="window.location.href='guest.html'">Continue as Guest →</button>
+    <div class="link-row">Don't have an account? <a href="register.html">Create one</a></div>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    if(api.isLoggedIn()) window.location.href='todos.html';
+    document.getElementById('loginForm').addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      const btn=document.getElementById('submitBtn');
+      const errorEl=document.getElementById('error');
+      errorEl.style.display='none';
+      btn.disabled=true;btn.textContent='Signing in...';
+      try{
+        const data=await api.login({email:document.getElementById('email').value,password:document.getElementById('password').value});
+        api.setToken(data.access_token);
+        window.location.href='todos.html';
+      }catch(err){
+        const msg=err.status===401?'Invalid email or password.':(typeof err.detail==='string'?err.detail:'Something went wrong.');
+        errorEl.textContent=msg;errorEl.style.display='block';
+        btn.disabled=false;btn.textContent='Sign In';
+      }
+    });
+  </script>
+</body>
+</html>
